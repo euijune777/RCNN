@@ -218,29 +218,26 @@ class LmdbDataset(Dataset):
 
 class RawDataset(Dataset):
 
+
     def __init__(self, root, opt):
         self.opt = opt
-        self.image_path_list = []
-        for dirpath, dirnames, filenames in os.walk(root):
-            for name in filenames:
-                _, ext = os.path.splitext(name)
-                ext = ext.lower()
-                if ext == '.jpg' or ext == '.jpeg' or ext == '.png':
-                    self.image_path_list.append(os.path.join(dirpath, name))
+        self.image = root
+        _, ext = os.path.splitext(self.image)
+        ext = ext.lower()
+        if ext == '.jpg' or ext == '.jpeg' or ext == '.png':
+            print('image format correct')
 
-        self.image_path_list = natsorted(self.image_path_list)
-        self.nSamples = len(self.image_path_list)
 
     def __len__(self):
-        return self.nSamples
+        return 1
 
     def __getitem__(self, index):
 
         try:
             if self.opt.rgb:
-                img = Image.open(self.image_path_list[index]).convert('RGB')  # for color image
+                img = Image.open(self.image).convert('RGB')  # for color image
             else:
-                img = Image.open(self.image_path_list[index]).convert('L')
+                img = Image.open(self.image).convert('L')
 
         except IOError:
             print(f'Corrupted image for {index}')
@@ -250,7 +247,8 @@ class RawDataset(Dataset):
             else:
                 img = Image.new('L', (self.opt.imgW, self.opt.imgH))
 
-        return (img, self.image_path_list[index])
+        return (img, self.image)
+
 
 
 class ResizeNormalize(object):
